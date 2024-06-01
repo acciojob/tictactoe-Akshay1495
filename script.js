@@ -1,80 +1,81 @@
-document.addEventListener("DOMContentLoaded", function() {
-  const player1Input = document.getElementById("player1");
-  const player2Input = document.getElementById("player2");
-  const submitButton = document.getElementById("submit");
-  const message = document.querySelector(".message");
-  const board = document.getElementById("board"); // Select the board element
+//your JS code here. If required.
+const playerInput = document.getElementById('player-input');
+    const player1Input = document.getElementById('player-1');
+    const player2Input = document.getElementById('player-2');
+    const submitButton = document.getElementById('submit');
+    const gameBoard = document.getElementById('game-board');
+    const messageDiv = document.querySelector('.message');
+    const cells = document.querySelectorAll('.cell');
 
-  let currentPlayer = 1;
-  let player1Name, player2Name;
-  let cells = document.querySelectorAll(".cell"); // Select all cells on the board
-  let boardState = ["", "", "", "", "", "", "", "", ""]; // Track the state of the board
+    let currentPlayer;
+    let player1;
+    let player2;
+    let gameOver = false;
 
-  submitButton.addEventListener("click", function() {
-    player1Name = player1Input.value;
-    player2Name = player2Input.value;
-    
-    if (player1Name && player2Name) { // Check if both players entered their names
-      message.textContent = `${player1Name}, you're up`;
-      document.getElementById("players").style.display = "none"; // Hide player inputs and start button
-      board.style.display = "grid"; // Display the board
-    } else {
-      alert("Please enter names for both players.");
-    }
-  });
+    // Start the game when submit button is clicked
+    submitButton.addEventListener('click', startGame);
 
-  cells.forEach(cell => {
-    cell.addEventListener("click", function() {
-      const index = parseInt(cell.id) - 1;
-      if (boardState[index] === "" && player1Name && player2Name) {
-        if (currentPlayer === 1) {
-          cell.textContent = "X";
-          boardState[index] = "X";
-          message.textContent = `${player2Name}, you're up`;
-          currentPlayer = 2;
-        } else {
-          cell.textContent = "O";
-          boardState[index] = "O";
-          message.textContent = `${player1Name}, you're up`;
-          currentPlayer = 1;
-        }
-        checkWin();
-      }
-    });
-  });
-
-  function checkWin() {
-    const winConditions = [
-      [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-      [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-      [0, 4, 8], [2, 4, 6] // Diagonals
-    ];
-
-    for (let condition of winConditions) {
-      const [a, b, c] = condition;
-      if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
-        if (boardState[a] === "X") {
-          message.textContent = `${player1Name} congratulations, you won!`;
-        } else {
-          message.textContent = `${player2Name} congratulations, you won!`;
-        }
-        // Change color of winning cells
-        cells[a].classList.add("winning-cell");
-        cells[b].classList.add("winning-cell");
-        cells[c].classList.add("winning-cell");
-        disableClick(); // Disable further clicks after win
-        return;
-      }
+    function startGame() {
+      player1 = player1Input.value;
+      player2 = player2Input.value;
+      currentPlayer = player1;
+      playerInput.style.display = 'none';
+      gameBoard.style.display = 'block';
+      messageDiv.textContent = `${currentPlayer}, you're up`;
     }
 
-    if (!boardState.includes("")) {
-      message.textContent = "It's a draw!";
-    }
-  }
-
-  function disableClick() {
+    // Handle cell clicks
     cells.forEach(cell => {
-      cell.removeEventListener("click", clickHandler);
+      cell.addEventListener('click', handleCellClick);
     });
-  }
-});
+
+    function handleCellClick(e) {
+      if (gameOver || e.target.textContent !== '\xa0') return;
+
+      e.target.textContent = currentPlayer === player1 ? 'x' : 'o';
+      checkWinner();
+      if (!gameOver) {
+        togglePlayer();
+      }
+    }
+
+    // Toggle between players
+    function togglePlayer() {
+      currentPlayer = currentPlayer === player1 ? player2 : player1;
+      messageDiv.textContent = `${currentPlayer}, you're up`;
+    }
+
+    // Check for a winner
+    function checkWinner() {
+      const winningCombos = [
+        [1, 2, 3], [4, 5, 6], [7, 8, 9], // Rows
+        [1, 4, 7], [2, 5, 8], [3, 6, 9], // Columns
+        [1, 5, 9], [3, 5, 7]              // Diagonals
+      ];
+
+      for (let combo of winningCombos) {
+        const [a, b, c] = combo;
+        const cellA = document.getElementById(a).textContent;
+        const cellB = document.getElementById(b).textContent;
+        const cellC = document.getElementById(c).textContent;
+
+        if (cellA !== '\xa0' && cellA === cellB && cellB === cellC) {
+          messageDiv.textContent = `${currentPlayer} congratulations you won!`;
+          highlightCells(combo);
+          gameOver = true;
+          return;
+        }
+      }
+
+      if ([...cells].every(cell => cell.textContent !== '\xa0')) {
+        messageDiv.textContent = "It's a draw!";
+        gameOver = true;
+      }
+    }
+
+    // Highlight winning cells
+    function highlightCells(combo) {
+      combo.forEach(cellId => {
+        document.getElementById(cellId).classList.add('highlight');
+      });
+    }
