@@ -5,8 +5,8 @@
 }
 
 
-#player-1 {
-  margin-bottom: 20px;
+#player-1, #player-2 {
+  margin-bottom: 10px;
 }
 
 .player-input {
@@ -14,7 +14,7 @@
 }
 
 .player-input label {
-  display: inline-block;
+  display: inline-block;https://www.svgrepo.com/show/345221/three-dots.svg
   width: 80px;
 }
 
